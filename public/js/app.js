@@ -20,11 +20,10 @@ class EditableTimerList extends React.Component {
     return (
       <div id='timers'>
         <Timer
-          title='Learn React'
-          project='Web Domination'
-          elapsed='8986300'
+          title='Walk Timer'
+          project='Dr. Strangelove'
+          elapsed='0000000'
           runningSince={null}
-          editFormOpen={false}
         />
       </div>
     );
@@ -32,8 +31,33 @@ class EditableTimerList extends React.Component {
 }
 
 class Timer extends React.Component {
+  state = {
+    timerIsRunning: false,
+    elapsed: '0000000',
+    runningSince: Date.now()
+  }
+  componentDidMount() {
+    this.forceUpdateInterval = setInterval(
+      () => this.forceUpdate(), 
+      50);
+  }
+  componentWillUnmount() {
+    clearInterval(this.forceUpdateInterval);
+  }
+  handleStartClick = () => {
+    this.setState({ timerIsRunning: true })
+  };
+  handleStopClick = () => {
+    this.setState({ timerIsRunning: false })
+  };
   render() {
-    const elapsedString = helpers.renderElapsedString(this.props.elapsed);
+    let elapsedString = '00:00:00';
+    if (this.state.timerIsRunning) {
+      elapsedString = helpers.renderElapsedString(
+        this.state.elapsed, 
+        this.state.runningSince
+      );
+    }
     return (
       <div className='ui centered card'>
         <div className='content'>
@@ -57,16 +81,42 @@ class Timer extends React.Component {
             </span>
           </div>
         </div>
-        <div className='ui bottom attached blue basic button'>
-          Start
-        </div>
+        <TimerActionButton
+          timerIsRunning={this.state.timerIsRunning}
+          onStartClick={this.handleStartClick}
+          onStopClick={this.handleStopClick}
+        />
       </div>
     );
   }
 }
 
+class TimerActionButton extends React.Component {
+  render() {
+    if (this.props.timerIsRunning) {
+      return (
+        <div
+          className='ui bottom attached red basic button'
+          onClick={this.props.onStopClick}
+        >
+          Stop
+        </div>
+      );
+    } else {
+      return (
+        <div
+          className='ui bottom attached green basic button'
+          onClick={this.props.onStartClick}
+        >
+          Start
+        </div>
+      );
+    }
+  }
+}
+
 ReactDOM.render(
-  <TimersDashboard />,
+  <TimerDashboard />,
   document.getElementById('content')
 );
 
