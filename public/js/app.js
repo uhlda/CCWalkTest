@@ -16,6 +16,13 @@ class TimerDashboard extends React.Component {
 }
 
 class EditableTimerList extends React.Component {
+  state = { 
+    timerText: ""
+  };
+  handleTimerText = (elapsedTime) => {
+    const text = "The patient took " + elapsedTime + " seconds to complete the 10 meter course"
+    this.setState({ timerText: text });
+  };
   render() {
     return (
       <div id='timers'>
@@ -24,7 +31,15 @@ class EditableTimerList extends React.Component {
           project='Dr. Strangelove'
           elapsed='0000000'
           runningSince={null}
+          onStopClick={this.handleTimerText}         
         />
+        <div className="ui horizontal divider">Results</div>
+        <textarea 
+          placeholder="Tell us more" 
+          value={this.state.timerText}
+          rows="3" 
+          style={{ minHeight: 100, minWidth: 400}}
+        />> 
       </div>
     );
   }
@@ -33,8 +48,8 @@ class EditableTimerList extends React.Component {
 class Timer extends React.Component {
   state = {
     timerIsRunning: false,
-    elapsed: '0000000',
-    runningSince: Date.now()
+    elapsed: 0,
+    runningSince: null
   }
   componentDidMount() {
     this.forceUpdateInterval = setInterval(
@@ -45,19 +60,27 @@ class Timer extends React.Component {
     clearInterval(this.forceUpdateInterval);
   }
   handleStartClick = () => {
-    this.setState({ timerIsRunning: true })
+    this.setState({ 
+      timerIsRunning: true,
+      runningSince: Date.now()
+    })
   };
   handleStopClick = () => {
-    this.setState({ timerIsRunning: false })
+    const elapsedString = helpers.renderElapsedString(
+      this.state.elapsed, 
+      this.state.runningSince
+    );
+    this.props.onStopClick(elapsedString);
+    this.setState({ 
+      timerIsRunning: false, 
+      runningSince: null
+    })
   };
   render() {
-    let elapsedString = '00:00:00';
-    if (this.state.timerIsRunning) {
-      elapsedString = helpers.renderElapsedString(
-        this.state.elapsed, 
-        this.state.runningSince
-      );
-    }
+    const elapsedString = helpers.renderElapsedString(
+      this.state.elapsed, 
+      this.state.runningSince
+    );
     return (
       <div className='ui centered card'>
         <div className='content'>
